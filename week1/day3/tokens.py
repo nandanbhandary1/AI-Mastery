@@ -27,8 +27,8 @@ for prompt in prompts:
         "role":role,
         "content":prompt
     }
-    response = client.chat.completions.create(model=model, messages=[msg])
+    response = client.chat.completions.create(model=model, messages=[msg], max_tokens=50)
     # ans = response.choices[0].message.content
     usage = response.usage # Contains full token
-    print(f"Prompt:{prompt} --> prompt_token: {usage.prompt_tokens}\ncompletion_token: {usage.completion_tokens} \nTotal_Tokens:{usage.total_tokens}")
+    print(f"Prompt:{prompt} --> prompt_token: {usage.prompt_tokens}\ncompletion_token: {usage.completion_tokens} \nTotal_Tokens:{usage.total_tokens} Finish Reason: {response.choices[0].finish_reason}")
     print()
