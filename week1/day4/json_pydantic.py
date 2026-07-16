@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
-
+from pydantic import BaseModel
 load_dotenv()
 my_api_key=os.getenv("GROQ_API_KEY")
 
@@ -13,9 +13,26 @@ client = Groq(api_key=my_api_key)
 
 model="llama-3.3-70b-versatile"
 
+#SYSTEM REQUIREMENTS
+class Ticket(BaseModel):
+    name:str
+    email:str
+    issue:str
+
+schema = Ticket.model_json_schema()
+
+system_prompt = """ 
+Extract the personal information from the Ticket strictly based on this schema {schema} and give a json output. 
+
+""" # mandatory to tell give in json obj
+
+message_system = {
+    "role":"system",
+    "content":system_prompt
+}
+
+# USER INFO
 role="user"
-
-
 
 
 text = "Hello my name is Nandan. I got MacBook before 2 months in Banglore, My email is nandan@gmail.com, and my phone no is 0001. It is in Warranty period pls replace the display"
@@ -29,9 +46,12 @@ msg = {
     "content":prompt
 }
 
-response = client.chat.completions.create(model=model, messages=[msg])
-print(response)
+response_format = {
+    "type":"json_object"
+}
+
+response = client.chat.completions.create(model=model, messages=[message_system, msg], response_format=response_format)
+# print(response)
 
 ans = response.choices[0].message.content
-print(ans)
-
+print(ans) 
