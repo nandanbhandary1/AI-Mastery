@@ -21,9 +21,12 @@ class Ticket(BaseModel):
 
 schema = Ticket.model_json_schema()
 
-system_prompt = """ 
-Extract the personal information from the Ticket strictly based on this schema {schema} and give a json output. 
 
+system_prompt = f"""
+Extract information from the ticket.
+Return ONLY a valid JSON object.
+The JSON must exactly match this schema:
+{schema}
 """ # mandatory to tell give in json obj
 
 message_system = {
@@ -50,8 +53,22 @@ response_format = {
     "type":"json_object"
 }
 
-response = client.chat.completions.create(model=model, messages=[message_system, msg], response_format=response_format)
+response = client.chat.completions.create(model=model, messages=[message_system, msg], temperature = 0, response_format=response_format)
 # print(response)
 
 ans = response.choices[0].message.content
 print(ans) 
+
+print("-----------------------------------")
+# HOW TO READ THIS??
+
+import json
+
+raw_json = ans
+data_file = json.loads(raw_json)
+ticket = Ticket(**data_file)
+# ticket = Ticket.model_validate(data_file)
+
+print(ticket.name)
+print(ticket.email)
+print(ticket.issue)
